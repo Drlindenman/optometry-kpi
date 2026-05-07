@@ -1,26 +1,42 @@
 import streamlit as st
 import pandas as pd
 
-# 1. SETUP - KFO Branding
-st.set_page_config(page_title="KFO KPI Dashboard", layout="wide")
+# 1. Page Config (Clean White Background)
+st.set_page_config(page_title="KS FAMILY OPTOMETRY KPI", layout="wide")
 
-# Navy: #1a365d | Gold: #b89a5b
+# Custom CSS for the "Blue Line" look and clean white background
 st.markdown("""
     <style>
-    .main { background-color: #f8f9fa; }
-    h1 { color: #1a365d !important; font-family: 'Helvetica Neue', sans-serif; font-weight: bold; }
-    h2 { color: #b89a5b !important; }
-    .stMetric { border: 1px solid #1a365d; padding: 15px; border-radius: 10px; background-color: white; }
+    /* Force entire page to white background */
+    .main { background-color: white !important; }
+    
+    /* Style H1: Add the Blue Line */
+    h1 {
+        color: black !important;
+        font-family: 'Helvetica Neue', sans-serif;
+        font-weight: bold;
+        border-bottom: 3px solid #1a365d; /* THE BLUE LONG LINE */
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+    
+    /* Style H2: Reporting Date */
+    h2 { color: black !important; font-family: sans-serif; }
+    
+    /* Metrics: White background with minimal black text */
+    .stMetric { border: none !important; color: black; background-color: white; }
+    
+    /* Ensure all background elements are white */
+    .stApp { background-color: white !important; }
     </style>
     """, unsafe_allow_html=True)
 
 st.title("KS FAMILY OPTOMETRY KPI")
-st.header("January 2026 Performance Report")
+st.header("Executive KPI Report: January 2026")
 
-# 2. SIDEBAR
-diag_goal = st.sidebar.slider("Diagnostic Goal %", 0.0, 20.0, 10.0)
-st.sidebar.markdown("---")
-with st.sidebar.expander("🔐 Admin / Payroll Details"):
+# 2. SIDEBAR - Admin Features
+with st.sidebar.expander("🔐 Admin (Keefer Bonus)"):
+    # Bonus is hidden until expanded
     keefer_receipts = 59277.11 
     keefer_bonus = max(0, (keefer_receipts - 55555.55) * 0.15)
     st.write(f"**Dr. Keefer Jan Bonus:** ${keefer_bonus:,.2f}")
@@ -41,13 +57,13 @@ df = pd.DataFrame(data)
 df['Rev/Hour'] = df['Receipts'] / df['Hours']
 df = df[['Doctor', 'Location', 'Receipts', 'Hours', 'Rev/Hour', 'VF %', 'OCT %']]
 
-# 5. STYLING FUNCTION - Red Alerts
+# 5. STYLING FUNCTION - Red Text for Metrics below 10%
 def apply_style(val):
-    if isinstance(val, (int, float)) and val < diag_goal:
-        return 'color: #d9534f; font-weight: bold; background-color: #fff5f5;'
-    return ''
+    if isinstance(val, (int, float)) and val < 10.0:
+        return 'color: #D32F2F; font-weight: bold;'
+    return 'color: black;'
 
-st.subheader("Provider Metrics: January 2026")
+st.subheader("January 2026 Provider Metrics")
 
 # 6. FORMATTING - Force $ and % Symbols
 styled_df = df.style.format({
@@ -58,9 +74,10 @@ styled_df = df.style.format({
     "OCT %": "{:.1f}%"
 }).map(apply_style, subset=['VF %', 'OCT %'])
 
+# Using dataframe for better visual consistency
 st.dataframe(styled_df, use_container_width=True)
 
-# 7. TOTALS
+# 7. TOTALS SUMMARY
 st.markdown("---")
 win_total = df[df['Location'] == 'Winfield']['Receipts'].sum()
 and_total = df[df['Location'] == 'Andover']['Receipts'].sum()
