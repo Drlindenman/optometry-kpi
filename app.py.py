@@ -1,47 +1,56 @@
 import streamlit as st
 import pandas as pd
 
-# 1. Page Config (Clean White Background)
-st.set_page_config(page_title="KS FAMILY OPTOMETRY KPI", layout="wide")
+# 1. Page Config (Clean White Dashboard Look)
+st.set_page_config(page_title="KFO KPI Dashboard", layout="wide")
 
-# Custom CSS for the "Blue Line" look and clean white background
+# Custom CSS to match the image style: White bg, Gold accents, Navy line
 st.markdown("""
     <style>
-    /* Force entire page to white background */
-    .main { background-color: white !important; }
+    /* Main Background */
+    .stApp { background-color: white; }
     
-    /* Style H1: Add the Blue Line */
-    h1 {
-        color: black !important;
-        font-family: 'Helvetica Neue', sans-serif;
-        font-weight: bold;
-        border-bottom: 3px solid #1a365d; /* THE BLUE LONG LINE */
+    /* Header with the Blue Line from your website */
+    .main-title {
+        color: #000000;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 36px;
+        font-weight: 800;
+        border-bottom: 4px solid #1a365d; /* The Blue Line */
         padding-bottom: 10px;
-        margin-bottom: 20px;
+        margin-bottom: 25px;
     }
     
-    /* Style H2: Reporting Date */
-    h2 { color: black !important; font-family: sans-serif; }
+    /* Metric Cards (Gold Accents) */
+    div[data-testid="stMetric"] {
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        padding: 20px;
+        border-radius: 10px;
+        border-top: 5px solid #b89a5b; /* Gold Top Border */
+    }
     
-    /* Metrics: White background with minimal black text */
-    .stMetric { border: none !important; color: black; background-color: white; }
-    
-    /* Ensure all background elements are white */
-    .stApp { background-color: white !important; }
+    /* Table Styling */
+    .stDataFrame { border: 1px solid #e0e0e0; border-radius: 10px; }
     </style>
     """, unsafe_allow_html=True)
 
-st.title("KS FAMILY OPTOMETRY KPI")
-st.header("Executive KPI Report: January 2026")
+# Main Title Section
+st.markdown('<p class="main-title">KS FAMILY OPTOMETRY KPI</p>', unsafe_allow_html=True)
+st.header("Executive Summary: January 2026")
 
-# 2. SIDEBAR - Admin Features
-with st.sidebar.expander("🔐 Admin (Keefer Bonus)"):
-    # Bonus is hidden until expanded
-    keefer_receipts = 59277.11 
-    keefer_bonus = max(0, (keefer_receipts - 55555.55) * 0.15)
-    st.write(f"**Dr. Keefer Jan Bonus:** ${keefer_bonus:,.2f}")
+# 2. Sidebar Management
+with st.sidebar:
+    st.image("https://ksfamilyoptometry.com/wp-content/uploads/2023/10/ks-family-optometry-logo.png", width=200) # Placeholder for your logo
+    st.markdown("### Settings")
+    diag_goal = st.slider("Diagnostic Goal %", 0.0, 20.0, 10.0)
+    st.markdown("---")
+    with st.expander("🔐 Payroll/Admin"):
+        k_receipts = 59277.11
+        bonus = max(0, (k_receipts - 55555.55) * 0.15)
+        st.write(f"Dr. Keefer Bonus: **${bonus:,.2f}**")
 
-# 3. JANUARY 2026 DATA
+# 3. Data Setup
 data = [
     {"Doctor": "Cory Lindenman", "Location": "Winfield", "Receipts": 91256.95, "Hours": 75.5, "VF %": 6.6, "OCT %": 9.3},
     {"Doctor": "Cory Lindenman", "Location": "Andover", "Receipts": 72792.73, "Hours": 60.5, "VF %": 6.6, "OCT %": 9.3},
@@ -50,40 +59,38 @@ data = [
     {"Doctor": "Michael Keefer", "Location": "Winfield", "Receipts": 43293.42, "Hours": 64.0, "VF %": 4.1, "OCT %": 12.2},
     {"Doctor": "Michael Keefer", "Location": "Andover", "Receipts": 15983.69, "Hours": 32.0, "VF %": 4.1, "OCT %": 12.2},
 ]
-
 df = pd.DataFrame(data)
-
-# 4. CALCULATION & SEQUENCE (Receipts -> Hours -> Rev/Hour)
 df['Rev/Hour'] = df['Receipts'] / df['Hours']
 df = df[['Doctor', 'Location', 'Receipts', 'Hours', 'Rev/Hour', 'VF %', 'OCT %']]
 
-# 5. STYLING FUNCTION - Red Text for Metrics below 10%
-def apply_style(val):
-    if isinstance(val, (int, float)) and val < 10.0:
-        return 'color: #D32F2F; font-weight: bold;'
-    return 'color: black;'
-
+# 4. Performance Table
 st.subheader("January 2026 Provider Metrics")
 
-# 6. FORMATTING - Force $ and % Symbols
+def apply_alerts(val):
+    if isinstance(val, (int, float)) and val < diag_goal:
+        return 'color: #d9534f; font-weight: bold;'
+    return 'color: #000000;'
+
 styled_df = df.style.format({
     "Receipts": "${:,.2f}",
     "Hours": "{:.1f}",
     "Rev/Hour": "${:,.2f}",
     "VF %": "{:.1f}%",
     "OCT %": "{:.1f}%"
-}).map(apply_style, subset=['VF %', 'OCT %'])
+}).map(apply_alerts, subset=['VF %', 'OCT %'])
 
-# Using dataframe for better visual consistency
-st.dataframe(styled_df, use_container_width=True)
+st.dataframe(styled_df, use_container_width=True, hide_index=True)
 
-# 7. TOTALS SUMMARY
+# 5. Summary Metrics (The Cards at the bottom)
 st.markdown("---")
+c1, c2, c3 = st.columns(3)
+total_receipts = df['Receipts'].sum()
 win_total = df[df['Location'] == 'Winfield']['Receipts'].sum()
 and_total = df[df['Location'] == 'Andover']['Receipts'].sum()
 
-col1, col2 = st.columns(2)
-with col1:
-    st.metric("Winfield Total (Jan 2026)", f"${win_total:,.2f}")
-with col2:
-    st.metric("Andover Total (Jan 2026)", f"${and_total:,.2f}")
+with c1:
+    st.metric("Practice Total", f"${total_receipts:,.2f}")
+with c2:
+    st.metric("Winfield Office", f"${win_total:,.2f}")
+with c3:
+    st.metric("Andover Office", f"${and_total:,.2f}")
