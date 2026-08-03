@@ -42,9 +42,9 @@ st.markdown("""
     }
     
     div[data-testid="stMetricLabel"] > label {
-        color: #555555 !important;
-        font-size: 14px;
-        font-weight: 600;
+        color: #000000 !important;
+        font-size: 15px;
+        font-weight: 700;
     }
     
     div[data-testid="stMetricValue"] > div {
@@ -121,7 +121,7 @@ with c2:
 with c3:
     st.metric(label="Andover Location Total (Jan 2026)", value=f"${and_total:,.2f}")
 
-# 8. Interactive Performance Visualizations
+# 8. Interactive Performance Visualizations with Dark Bold Font Styling
 st.markdown("---")
 st.subheader("Performance Analytics Graphs")
 
@@ -136,10 +136,20 @@ with col_graph1:
         color="Doctor",
         title="Revenue Breakdown by Location & Doctor",
         labels={"Receipts": "Total Receipts ($)", "Location": "Clinic Location"},
-        color_discrete_sequence=['#1a365d', '#B89A5B', '#4A5568'], # Navy, Gold, Charcoal
+        color_discrete_sequence=['#1a365d', '#B89A5B', '#4A5568'],
         barmode="stack"
     )
-    fig_location.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+    
+    # Customizing layout for dark and bold fonts
+    fig_location.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(family="Arial Black, Helvetica, sans-serif", size=13, color="#000000"),
+        title_font=dict(size=18, color="#000000", family="Arial Black"),
+        xaxis=dict(title_font=dict(size=14, color="#000000"), tickfont=dict(size=13, color="#000000")),
+        yaxis=dict(title_font=dict(size=14, color="#000000"), tickfont=dict(size=13, color="#000000")),
+        legend=dict(font=dict(size=12, color="#000000"))
+    )
     st.plotly_chart(fig_location, use_container_width=True)
 
 # Graph 2: Revenue Per Hour by Doctor
@@ -154,5 +164,15 @@ with col_graph2:
         color_discrete_sequence=['#B89A5B', '#1a365d'],
         barmode="group"
     )
-    fig_rev_hour.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+    
+    # Customizing layout for dark and bold fonts
+    fig_rev_hour.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(family="Arial Black, Helvetica, sans-serif", size=13, color="#000000"),
+        title_font=dict(size=18, color="#000000", family="Arial Black"),
+        xaxis=dict(title_font=dict(size=14, color="#000000"), tickfont=dict(size=13, color="#000000")),
+        yaxis=dict(title_font=dict(size=14, color="#000000"), tickfont=dict(size=13, color="#000000")),
+        legend=dict(font=dict(size=12, color="#000000"))
+    )
     st.plotly_chart(fig_rev_hour, use_container_width=True)
